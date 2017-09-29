@@ -50,20 +50,21 @@ class Authorship {
       }
     });
     this.addAuthor(this.options.authorId, this.options.color);
-	
-	// for authorship color on/off toolbar item
-	let toolbar = this.quill.getModule('toolbar');
-	toolbar.addHandler('authorship-toggle', function() {
-		
-	});
-	let customButton = document.querySelector('button.ql-authorship-toggle');
-		
-	let authorshipObj = this;
-	customButton.addEventListener('click', function() {
-		// toggle on/off authorship colors
-		authorshipObj.enable(!authorshipObj.isEnabled);		
-	});	
-	
+
+  	// for authorship color on/off toolbar item
+  	let toolbar = this.quill.getModule('toolbar');
+    if(toolbar) {
+    	toolbar.addHandler('authorship-toggle', function() {
+
+    	});
+    	let customButton = document.querySelector('button.ql-authorship-toggle');
+
+    	let authorshipObj = this;
+    	customButton.addEventListener('click', function() {
+    		// toggle on/off authorship colors
+    		authorshipObj.enable(!authorshipObj.isEnabled);
+    	});
+    }
   }
 
   enable(enabled = true) {
