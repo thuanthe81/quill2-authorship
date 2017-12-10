@@ -11,9 +11,9 @@ let AuthorClass = new Parchment.Attributor.Class('author', 'ql-author', {
 
 class Authorship {
   constructor(quill, options) {
-	this.quill = quill;
-	this.options = options;
-	this.isEnabled;
+    this.quill = quill;
+    this.options = options;
+    this.isEnabled;
 	
     if(this.options.enabled) {
       this.enable();
@@ -65,16 +65,25 @@ class Authorship {
     		authorshipObj.enable(!authorshipObj.isEnabled);
     	});
     }
+
+    // to delete the other author background style.
+    quill.clipboard.addMatcher('span', function(node, delta) {
+
+      delta.ops.forEach(function(op) {
+        op.attributes["background"] && delete op.attributes["background"];
+      });
+      return delta;
+    });
   }
 
   enable(enabled = true) {
     this.quill.root.classList.toggle('ql-authorship', enabled);
-	this.isEnabled = enabled;
+	  this.isEnabled = enabled;
   }
 
   disable() {
     this.enable(false);
-	this.isEnabled = false;
+	  this.isEnabled = false;
   }
 
   addAuthor(id, color) {
