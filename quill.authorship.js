@@ -38,6 +38,12 @@ class Authorship {
           if(op.insert || (op.retain && op.attributes)) {
             // Add authorship to insert/format
             op.attributes = op.attributes || {};
+
+            // Bug fix for Chinese keyboards which show Pinyin first before Chinese text, and also other keyboards like Tamil
+            if (op.attributes.author && op.attributes.author === this.options.authorId) {
+              return;
+            }
+            // End bug fix
             op.attributes.author = this.options.authorId;
             // Apply authorship to our own editor
             authorDelta.retain(op.retain || op.insert.length || 1, authorFormat);
