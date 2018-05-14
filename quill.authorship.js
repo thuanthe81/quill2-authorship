@@ -57,21 +57,6 @@ class Authorship {
     });
     this.addAuthor(this.options.authorId, this.options.color);
 
-  	// for authorship color on/off toolbar item
-  	let toolbar = this.quill.getModule('toolbar');
-    if(toolbar) {
-    	toolbar.addHandler('authorship-toggle', function() {
-
-    	});
-    	let customButton = document.querySelector('button.ql-authorship-toggle');
-
-    	let authorshipObj = this;
-    	customButton.addEventListener('click', function() {
-    		// toggle on/off authorship colors
-    		authorshipObj.enable(!authorshipObj.isEnabled);
-    	});
-    }
-
     // to delete the other author background style.
     quill.clipboard.addMatcher('span', function(node, delta) {
 
