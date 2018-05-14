@@ -55,7 +55,6 @@ class Authorship {
         this.quill.updateContents(authorDelta, Quill.sources.SILENT); 
       }
     });
-    this.addAuthor(this.options.authorId, this.options.color);
 
     // to delete the other author background style.
     quill.clipboard.addMatcher('span', function(node, delta) {
