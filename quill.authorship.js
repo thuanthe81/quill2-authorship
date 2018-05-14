@@ -86,13 +86,12 @@ class Authorship {
     if(!this.styleElement) {
       this.styleElement = document.createElement('style');
       this.styleElement.type = 'text/css';
-	  this.styleElement.classList.add('ql-authorship-style'); // in case for some manipulation
-	  this.styleElement.classList.add('ql-authorship-style-'+this.options.authorId); // in case for some manipulation
+      this.styleElement.classList.add('ql-authorship-style'); // in case for some manipulation
+      this.styleElement.classList.add('ql-authorship-style-'+this.options.authorId); // in case for some manipulation
       document.documentElement.getElementsByTagName('head')[0].appendChild(this.styleElement);
     }
 	
-	this.styleElement.innerHTML = css; // bug fix
-    // this.styleElement.sheet.insertRule(css, 0);
+    this.styleElement.innerHTML = this.styleElement.innerHTML+css;
   }
 }
 
