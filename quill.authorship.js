@@ -1,11 +1,11 @@
 /*
 * to be used with browerify, included quill module
 */
-var Quill = require('quill');
+var Quill = require('quill2');
 var Parchment = Quill.import('parchment');
 var Delta = require('quill-delta');
 
-let AuthorClass = new Parchment.Attributor.Class('author', 'ql-author', {
+let AuthorClass = new Parchment.ClassAttributor('author', 'ql-author', {
   scope: Parchment.Scope.INLINE
 });
 
