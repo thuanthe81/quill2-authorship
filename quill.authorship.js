@@ -24,6 +24,28 @@ class Authorship {
     }
 
     Quill.register(AuthorClass, true);
+
+    // For IME keyboards detection. If IME keyboards, only add author attribute
+    // on `compositionend` where actual character appears (like in Chinese Pinyin keyboards)
+    let compositionstart = false;
+    let authorDeltaToApply = null;
+    this.quill.scroll.domNode.addEventListener('compositionstart', function () {
+      compositionstart = true;
+      authorDeltaToApply= null;
+    });
+    this.quill.scroll.domNode.addEventListener('compositionend', function () {
+      compositionstart = false;
+      if (authorDeltaToApply) {
+        quill.updateContents(authorDeltaToApply, Quill.sources.SILENT);
+        authorDeltaToApply=null;
+      }
+    });
+    /*this.quill.scroll.domNode.addEventListener('input', function (event) {
+      console.log(event.isComposing, 'event.isComposing')
+    });
+    this.quill.scroll.domNode.addEventListener('compositionupdate', function () {
+      
+    });*/
 		
     this.quill.on(Quill.events.EDITOR_CHANGE, (eventName, delta, oldDelta, source) => {
 
@@ -52,9 +74,33 @@ class Authorship {
             authorDelta.retain(op.retain);
           }
         });
-        this.quill.updateContents(authorDelta, Quill.sources.SILENT); 
+        
+        // if IME keyboard (e.g. CH Pinyin), only update the delta with author attribute
+        // on `compositionend`. If non-IME keyboard (e.g. English) there will be no `compositionstart`
+        authorDeltaToApply = authorDelta; // copy it to apply later at `conpositionend` for IME keyboards
+        if (!compositionstart) { // if non-IME keyboards, else wait for the `compositionend` to fire (see above)
+
+          this.quill.updateContents(authorDelta, Quill.sources.SILENT);
+        }
+
       }
     });
+    this.addAuthor(this.options.authorId, this.options.color);
+
+  	// for authorship color on/off toolbar item
+  	let toolbar = this.quill.getModule('toolbar');
+    if(toolbar) {
+    	toolbar.addHandler('authorship-toggle', function() {
+
+    	});
+    	let customButton = document.querySelector('button.ql-authorship-toggle');
+
+    	let authorshipObj = this;
+    	customButton.addEventListener('click', function() {
+    		// toggle on/off authorship colors
+    		authorshipObj.enable(!authorshipObj.isEnabled);
+    	});
+    }
 
     // to delete the other author background style.
     quill.clipboard.addMatcher('span', function(node, delta) {
@@ -85,12 +131,13 @@ class Authorship {
     if(!this.styleElement) {
       this.styleElement = document.createElement('style');
       this.styleElement.type = 'text/css';
-      this.styleElement.classList.add('ql-authorship-style'); // in case for some manipulation
-      this.styleElement.classList.add('ql-authorship-style-'+this.options.authorId); // in case for some manipulation
+	  this.styleElement.classList.add('ql-authorship-style'); // in case for some manipulation
+	  this.styleElement.classList.add('ql-authorship-style-'+this.options.authorId); // in case for some manipulation
       document.documentElement.getElementsByTagName('head')[0].appendChild(this.styleElement);
     }
 	
-    this.styleElement.innerHTML = this.styleElement.innerHTML+css;
+	this.styleElement.innerHTML = css; // bug fix
+    // this.styleElement.sheet.insertRule(css, 0);
   }
 }
 
