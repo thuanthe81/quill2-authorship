@@ -26,6 +26,7 @@ button.ql-authorship-toggle {
 .ql-author-tooltip-area {
   display: flex;
   justify-content: center;
+  white-space: nowrap;
 }
 
 .ql-author-tooltip-avatar > img {

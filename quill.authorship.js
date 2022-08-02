@@ -270,9 +270,12 @@ class Authorship {
     }
 
     this.hoverOnAuthor = author;
-
     let target = e.target;
-    let left = target.offsetLeft+target.offsetWidth/2;
+    let editorW = target.offsetParent.firstChild.clientWidth;
+    let contentW = target.offsetParent.firstChild.firstChild.clientWidth;
+    let padding = (editorW - contentW)/2;
+    let firstLineW = Math.min(contentW + padding - target.offsetLeft, target.offsetWidth);
+    let left = target.offsetLeft + firstLineW/2;
     this.tooltipContainer.style.cssText = `left:${left}px;top:${target.offsetTop}px`;
 
     let authorDetail = this.options.getAuthorDetail(author);

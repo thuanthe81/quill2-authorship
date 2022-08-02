@@ -1,6 +1,6 @@
 {
   "name": "quill2-authorship",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Authorship plugin for Quill2 editor",
   "main": "quill.authorship.js",
   "scripts": {
