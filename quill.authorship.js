@@ -129,7 +129,7 @@ class Authorship {
             // Bug fix for Chinese keyboards which show Pinyin first before Chinese text, and also other keyboards like Tamil
             if (op.attributes.author) {
               let author = parseAuthor(op.attributes.author);
-              if (author.authorId = this.options.authorId) {
+              if (author.authorId == this.options.authorId) {
                 return;
               }
             }
@@ -190,8 +190,9 @@ class Authorship {
     }
     this.tooltipContainer.onmouseleave = function(e) {
       that.cursorOnTooltip = false;
+      let author = that.hoverOnAuthor;
       window.setTimeout(function(){
-        if (!that.hoverOnAuthor) that.removeTooltip();
+        that.removeTooltip(author);
       }, 300);
     }
     this.tooltipContainer.onclick = function(e) {
@@ -266,15 +267,17 @@ class Authorship {
     if (this.hoverOnAuthor == author) return;
 
     if (this.hoverOnAuthor || this.tooltipContainer.firstChild) {
-      this.removeTooltip();
+      this.removeTooltip(this.hoverOnAuthor);
     }
 
     this.hoverOnAuthor = author;
     let target = e.target;
-    let editorW = target.offsetParent.firstChild.clientWidth;
-    let contentW = target.offsetParent.firstChild.firstChild.clientWidth;
-    let padding = (editorW - contentW)/2;
-    let firstLineW = Math.min(contentW + padding - target.offsetLeft, target.offsetWidth);
+    let containerW = this.quill.container.clientWidth;
+    let containerStyle = window.getComputedStyle(this.quill.container, null);
+    let paddingL = parseInt(containerStyle.paddingLeft);
+    let paddingR = parseInt(containerStyle.paddingRight);
+    let contentW = containerW - paddingL - paddingR;
+    let firstLineW = Math.min(this.quill.container.offsetLeft + contentW + paddingL - target.offsetLeft, target.offsetWidth);
     let left = target.offsetLeft + firstLineW/2;
     this.tooltipContainer.style.cssText = `left:${left}px;top:${target.offsetTop}px`;
 
@@ -289,16 +292,15 @@ class Authorship {
   }
 
   onAuthorMouseLeave(e, author) {
-    this.hoverOnAuthor = null;
     let that = this;
     window.setTimeout(function(){
-      if (!that.cursorOnTooltip) {
-        that.removeTooltip();
-      }
+      that.removeTooltip(author);
     }, 300);
   }
 
-  removeTooltip() {
+  removeTooltip(author) {
+    if (author !== this.hoverOnAuthor || this.cursorOnTooltip) return;
+
     this.hoverOnAuthor = null;
     if (this.tooltipContainer.firstChild) this.tooltipContainer.firstChild.remove();
     this.tooltipContainer.style.cssText = "display:none";
