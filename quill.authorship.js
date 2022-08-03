@@ -214,20 +214,28 @@ class Authorship {
   }
 
   addAuthor(id, color) {
-    let css = ".ql-authorship .ql-author-" + id + " { " + "background-color:" + color + "; }\n";
-    this.addStyle(css);
-  }
-
-  addStyle(css) {
     if(!this.styleElement) {
+      this.authors = {};
       this.styleElement = document.createElement('style');
       this.styleElement.type = 'text/css';
-    this.styleElement.classList.add('ql-authorship-style'); // in case for some manipulation
-    this.styleElement.classList.add('ql-authorship-style-'+this.options.authorId); // in case for some manipulation
+      this.styleElement.classList.add('ql-authorship-style'); // in case for some manipulation
+      this.styleElement.classList.add('ql-authorship-style-'+this.options.authorId); // in case for some manipulation
       document.documentElement.getElementsByTagName('head')[0].appendChild(this.styleElement);
     }
+    this.authors[id] = color;
+    this.updateStyle();
+  }
 
-  this.styleElement.innerHTML = css; // bug fix
+  authorStyle(id, color) {
+    return ".ql-authorship .ql-author-" + id + " { " + "background-color:" + color + "; }\n";
+  }
+
+  updateStyle() {
+    let css = "";
+    for (const [key, value] of Object.entries(this.authors)) {
+      css += this.authorStyle(key, value);
+    }
+    this.styleElement.innerHTML = css; // bug fix
     // this.styleElement.sheet.insertRule(css, 0);
   }
 
