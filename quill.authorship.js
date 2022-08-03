@@ -18,9 +18,8 @@ function parseAuthor(authorStr) {
 
 
 class AuthorClassAttributor extends Parchment.ClassAttributor {
-  constructor(authorship, ...args) {
+  constructor(...args) {
     super(...args);
-    this.authorship = authorship;
     this.authorEditedTimeClass = new Parchment.ClassAttributor('author', 'ql-authorEditedTime')
   }
   add(node, value) {
@@ -29,10 +28,14 @@ class AuthorClassAttributor extends Parchment.ClassAttributor {
       this.authorEditedTimeClass.add(node, author.editedTime);
       let that = this;
       node.onmouseover = function(e) {
-        that.authorship.onAuthorMouseOver(e, author);
+        const event = that.buildEvent("author-over", author, e);
+        that.dispatchEvent(node, event);
+        e.preventDefault();
       }
       node.onmouseleave = function(e) {
-        that.authorship.onAuthorMouseLeave(e, author);
+        const event = that.buildEvent("author-leave", author, e);
+        that.dispatchEvent(node, event);
+        e.preventDefault();
       }
     }
     return true;
@@ -49,6 +52,28 @@ class AuthorClassAttributor extends Parchment.ClassAttributor {
     return id ? `${id};${editedTime}` : '';
   }
 
+  buildEvent(name, dataset, e) {
+    const event = new Event(name, {
+      bubbles: true,
+      cancelable: true
+    });
+    event.value = Object.assign({}, dataset);
+    event.event = e;
+    return event;
+  }
+
+  dispatchEvent(node, event) {
+    let quillContainerNode = null;
+    let checkNode = node;
+    do {
+      checkNode = checkNode.parentNode;
+      if (checkNode.className.match('ql-editor')) {
+        quillContainerNode = checkNode.parentNode;
+      }
+    } while (!quillContainerNode);
+
+    quillContainerNode.dispatchEvent(event);
+  }
 }
 
 
@@ -84,7 +109,7 @@ class Authorship {
       return;
     }
 
-    let AuthorClass = new AuthorClassAttributor(this, 'author', 'ql-author', {
+    let AuthorClass = new AuthorClassAttributor('author', 'ql-author', {
       scope: Parchment.Scope.INLINE
     });
 
@@ -190,10 +215,7 @@ class Authorship {
     }
     this.tooltipContainer.onmouseleave = function(e) {
       that.cursorOnTooltip = false;
-      let author = that.hoverOnAuthor;
-      window.setTimeout(function(){
-        that.removeTooltip(author);
-      }, 300);
+      that.removeTooltip(that.hoverOnAuthor);
     }
     this.tooltipContainer.onclick = function(e) {
       if (that.options.onAuthorClicked) {
@@ -201,6 +223,13 @@ class Authorship {
         that.options.onAuthorClicked(e);
       }
     }
+    this.quill.container.addEventListener("author-over", (event) => {
+      that.onAuthorMouseOver(event.event, event.value);
+    });
+    this.quill.container.addEventListener("author-leave", (event) => {
+      that.onAuthorMouseLeave(event.event, event.value);
+    });
+
   }
 
   enable(enabled = true) {
@@ -307,7 +336,7 @@ class Authorship {
   }
 
   removeTooltip(author) {
-    if (author !== this.hoverOnAuthor || this.cursorOnTooltip) return;
+    if (this.hoverOnAuthor && (author.authorId !== this.hoverOnAuthor.authorId || this.cursorOnTooltip)) return;
 
     this.hoverOnAuthor = null;
     if (this.tooltipContainer.firstChild) this.tooltipContainer.firstChild.remove();
