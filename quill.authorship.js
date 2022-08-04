@@ -95,15 +95,24 @@ class Authorship {
                     cssClassTooltipName: "ql-author-tooltip-name",
                     // cssClassTooltipEditedTime: "ql-author-tooltip-edited-time",
                     datetimeToString: simpleFormatDatetime,
+                    enableColoring: true,
                     getAuthorDetail: null,
+                    id: "",
                     // onAuthorClicked: function (e){console.log("Clicked on:", e.data)},
                     ...options};
+
+    this.authors = {};
+    this.styleElement = document.createElement('style');
+    this.styleElement.type = 'text/css';
+    this.styleElement.classList.add('ql-authorship-style'); // in case for some manipulation
+    this.styleElement.classList.add('ql-authorship-style-'+this.options.authorId); // in case for some manipulation
+    this.quill.container.appendChild(this.styleElement);
 
     this.isEnabled;
 
     if(this.options.enabled) {
       this.enable();
-    this.isEnabled = true;
+      this.isEnabled = true;
     }
     if(!this.options.authorId) {
       return;
@@ -229,11 +238,12 @@ class Authorship {
     this.quill.container.addEventListener("author-leave", (event) => {
       that.onAuthorMouseLeave(event.event, event.value);
     });
-
   }
 
+  authorshipClass() {return 'ql-authorship-' + this.options.id};
+
   enable(enabled = true) {
-    this.quill.root.classList.toggle('ql-authorship', enabled);
+    this.quill.root.classList.toggle(this.authorshipClass(), enabled);
     this.isEnabled = enabled;
   }
 
@@ -243,26 +253,24 @@ class Authorship {
   }
 
   addAuthor(id, color) {
-    if(!this.styleElement) {
-      this.authors = {};
-      this.styleElement = document.createElement('style');
-      this.styleElement.type = 'text/css';
-      this.styleElement.classList.add('ql-authorship-style'); // in case for some manipulation
-      this.styleElement.classList.add('ql-authorship-style-'+this.options.authorId); // in case for some manipulation
-      document.documentElement.getElementsByTagName('head')[0].appendChild(this.styleElement);
-    }
     this.authors[id] = color;
     this.updateStyle();
   }
 
+  setEnableColoring(enable) {
+    this.options.enableColoring = enable;
+    this.updateStyle();
+  }
   authorStyle(id, color) {
-    return ".ql-authorship .ql-author-" + id + " { " + "background-color:" + color + "; }\n";
+    return "." + this.authorshipClass() + " .ql-author-" + id + " { " + "background-color:" + color + "; }\n";
   }
 
   updateStyle() {
     let css = "";
-    for (const [key, value] of Object.entries(this.authors)) {
-      css += this.authorStyle(key, value);
+    if (this.options.enableColoring) {
+      for (const [key, value] of Object.entries(this.authors)) {
+        css += this.authorStyle(key, value);
+      }
     }
     this.styleElement.innerHTML = css; // bug fix
     // this.styleElement.sheet.insertRule(css, 0);
